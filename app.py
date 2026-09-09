@@ -63,21 +63,24 @@ st.markdown(f"""
       background:{PANEL}; }}
   .stDataFrame {{ border:1px solid {LINE}; border-radius:10px; }}
 
-  /* Multiselect tags → white with black text */
-  section[data-testid="stSidebar"] span[data-baseweb="tag"] {{
+  /* Multiselect tags → white with black text (broad selectors) */
+  [data-testid="stMultiSelect"] [data-baseweb="tag"],
+  [data-testid="stMultiSelect"] span[data-baseweb="tag"],
+  span[data-baseweb="tag"] {{
       background-color:{PANEL} !important;
+      background:{PANEL} !important;
       color:{INK} !important;
       border:1px solid {LINE} !important;
   }}
-  section[data-testid="stSidebar"] span[data-baseweb="tag"] span {{
+  /* every descendant of a tag: text, spans, divs */
+  [data-testid="stMultiSelect"] [data-baseweb="tag"] *,
+  span[data-baseweb="tag"] * {{
       color:{INK} !important;
-  }}
-  section[data-testid="stSidebar"] span[data-baseweb="tag"] [role="button"] svg,
-  section[data-testid="stSidebar"] span[data-baseweb="tag"] svg {{
       fill:{INK} !important;
-      color:{INK} !important;
   }}
-  section[data-testid="stSidebar"] span[data-baseweb="tag"] [role="button"]:hover {{
+  /* the × close-button hover */
+  [data-testid="stMultiSelect"] [data-baseweb="tag"] [role="button"]:hover,
+  span[data-baseweb="tag"] [role="button"]:hover {{
       background-color:{PANEL2} !important;
   }}
 </style>
@@ -184,7 +187,7 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-st.markdown("# AI Ecosystem Compass")
+st.markdown("# Ecosystem Compass")
 st.markdown('<p class="lede">Where is capital being rewarded across the technology stack? '
             'Each ecosystem is ranked on how its constituents performed, how much risk that '
             'took, and how broadly the strength was shared — then you can open any one to see '
