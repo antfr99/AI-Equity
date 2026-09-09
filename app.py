@@ -62,6 +62,24 @@ st.markdown(f"""
   div[data-testid="stExpander"] {{ border:1px solid {LINE}; border-radius:10px;
       background:{PANEL}; }}
   .stDataFrame {{ border:1px solid {LINE}; border-radius:10px; }}
+
+  /* Multiselect tags → white with black text */
+  section[data-testid="stSidebar"] span[data-baseweb="tag"] {{
+      background-color:{PANEL} !important;
+      color:{INK} !important;
+      border:1px solid {LINE} !important;
+  }}
+  section[data-testid="stSidebar"] span[data-baseweb="tag"] span {{
+      color:{INK} !important;
+  }}
+  section[data-testid="stSidebar"] span[data-baseweb="tag"] [role="button"] svg,
+  section[data-testid="stSidebar"] span[data-baseweb="tag"] svg {{
+      fill:{INK} !important;
+      color:{INK} !important;
+  }}
+  section[data-testid="stSidebar"] span[data-baseweb="tag"] [role="button"]:hover {{
+      background-color:{PANEL2} !important;
+  }}
 </style>
 """, unsafe_allow_html=True)
 
