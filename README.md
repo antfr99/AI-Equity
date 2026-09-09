@@ -44,6 +44,14 @@ streamlit run app.py
 The table coloring is computed in pure Python (no matplotlib dependency), so it
 renders on a bare Streamlit Cloud install.
 
+## Theme
+
+`.streamlit/config.toml` pins a clean white/light theme (`base = "light"`).
+Deploy it alongside `app.py` — dotfolders sometimes get skipped by drag-and-drop
+uploads or `.gitignore` templates, so confirm `.streamlit/config.toml` is
+actually present in your repo, and do a full app reboot (not just a rerun)
+after adding or changing it, since theme config is only read at process start.
+
 ## Filters
 
 Ecosystems compared · period · rank metric · countries · min market cap ·

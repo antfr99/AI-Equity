@@ -17,19 +17,19 @@ from aggregate import (aggregate_ecosystems, build_constituents,
                        rank_metric_options)
 
 # ---------------------------------------------------------------------------
-# Palette — dark analyst terminal
+# Palette — clean light
 # ---------------------------------------------------------------------------
-BASE   = "#0E1117"
-PANEL  = "#181D27"
-PANEL2 = "#1F2634"
-LINE   = "#2A3140"
-INK    = "#E6E9EF"
-MUTED  = "#8B93A7"
-GAIN   = "#22C55E"
-LOSS   = "#F43F5E"
-ACCENT = "#F5B301"
-SEQ    = ["#5B8DEF", "#22C55E", "#F5B301", "#F43F5E", "#A78BFA", "#2DD4BF",
-          "#FB923C", "#F472B6", "#94A3B8", "#60A5FA", "#34D399"]
+BASE   = "#FFFFFF"
+PANEL  = "#FFFFFF"
+PANEL2 = "#F3F4F6"
+LINE   = "#E2E5EA"
+INK    = "#111827"
+MUTED  = "#6B7280"
+GAIN   = "#15803D"
+LOSS   = "#DC2626"
+ACCENT = "#B45309"
+SEQ    = ["#2563EB", "#15803D", "#B45309", "#DC2626", "#7C3AED", "#0891B2",
+          "#EA580C", "#DB2777", "#4B5563", "#0284C7", "#059669"]
 
 st.set_page_config(page_title="Ecosystem Compass", layout="wide",
                    initial_sidebar_state="expanded")
@@ -38,26 +38,29 @@ st.markdown(f"""
 <style>
   .stApp {{ background:{BASE}; color:{INK}; }}
   header[data-testid="stHeader"] {{ background:{BASE}; border-bottom:1px solid {LINE}; }}
-  section[data-testid="stSidebar"] {{ background:{PANEL}; border-right:1px solid {LINE}; }}
+  section[data-testid="stSidebar"] {{ background:{PANEL2}; border-right:1px solid {LINE}; }}
   h1,h2,h3,h4 {{ color:{INK}; letter-spacing:-0.015em; }}
   .block-container {{ padding-top:1.6rem; max-width:1480px; }}
   [data-testid="stMetric"] {{ background:{PANEL}; border:1px solid {LINE};
-      border-radius:12px; padding:14px 16px; }}
+      border-radius:12px; padding:14px 16px;
+      box-shadow:0 1px 2px rgba(17,24,39,0.04); }}
   [data-testid="stMetricValue"] {{ font-variant-numeric:tabular-nums;
-      font-weight:700; font-size:1.55rem; }}
+      font-weight:700; font-size:1.55rem; color:{INK}; }}
   [data-testid="stMetricLabel"] {{ color:{MUTED}; font-size:0.82rem; }}
   .lede {{ color:{MUTED}; font-size:1.03rem; line-height:1.55; max-width:76ch; }}
-  .sect {{ font-size:1.12rem; font-weight:650; margin:0.4rem 0 0.2rem 0; }}
+  .sect {{ font-size:1.12rem; font-weight:650; margin:0.4rem 0 0.2rem 0; color:{INK}; }}
   .sub {{ color:{MUTED}; font-size:0.86rem; margin-bottom:0.5rem; }}
   .pill {{ display:inline-block; padding:2px 9px; border-radius:6px;
       background:{PANEL2}; color:{INK}; font-size:0.76rem; font-weight:600;
-      font-variant-numeric:tabular-nums; margin-right:7px; letter-spacing:0.02em; }}
+      font-variant-numeric:tabular-nums; margin-right:7px; letter-spacing:0.02em;
+      border:1px solid {LINE}; }}
   .row {{ padding:5px 0; border-bottom:1px solid {LINE}; }}
   hr {{ border-color:{LINE}; margin:1.1rem 0; }}
   .stTabs [data-baseweb="tab-list"] {{ gap:6px; }}
   .stTabs [data-baseweb="tab"] {{ color:{MUTED}; }}
   .stTabs [aria-selected="true"] {{ color:{INK}; border-bottom-color:{ACCENT}!important; }}
-  div[data-testid="stExpander"] {{ border:1px solid {LINE}; border-radius:10px; }}
+  div[data-testid="stExpander"] {{ border:1px solid {LINE}; border-radius:10px;
+      background:{PANEL}; }}
   .stDataFrame {{ border:1px solid {LINE}; border-radius:10px; }}
 </style>
 """, unsafe_allow_html=True)
@@ -90,7 +93,7 @@ def _hex(r, g, b):
 
 
 def diverging_bg(series, center=0.0):
-    """Red→panel→green cell backgrounds without matplotlib (Cloud has none)."""
+    """White→green / white→red cell backgrounds without matplotlib (Cloud has none)."""
     s = pd.to_numeric(series, errors="coerce")
     finite = s[np.isfinite(s)]
     if finite.empty:
@@ -98,22 +101,20 @@ def diverging_bg(series, center=0.0):
     lo, hi = float(finite.min()), float(finite.max())
     neg_span = max(center - lo, 1e-9)
     pos_span = max(hi - center, 1e-9)
-    base = (24, 29, 39)
+    base = (255, 255, 255)
     out = []
     for v in s:
         if not np.isfinite(v):
             out.append(""); continue
         if v >= center:
-            t = min(v / pos_span, 1.0) * 0.85
-            r, g, b = (base[0] + (34 - base[0]) * t, base[1] + (197 - base[1]) * t,
-                       base[2] + (94 - base[2]) * t)
+            t = min(v / pos_span, 1.0) * 0.75
+            r, g, b = (base[0] + (209 - base[0]) * t, base[1] + (237 - base[1]) * t,
+                       base[2] + (216 - base[2]) * t)
         else:
-            t = min((center - v) / neg_span, 1.0) * 0.85
-            r, g, b = (base[0] + (244 - base[0]) * t, base[1] + (63 - base[1]) * t,
-                       base[2] + (94 - base[2]) * t)
-        lum = 0.299 * r + 0.587 * g + 0.114 * b
-        fg = "#0E1117" if lum > 150 else INK
-        out.append(f"background-color:{_hex(r, g, b)};color:{fg}")
+            t = min((center - v) / neg_span, 1.0) * 0.75
+            r, g, b = (base[0] + (250 - base[0]) * t, base[1] + (214 - base[1]) * t,
+                       base[2] + (214 - base[2]) * t)
+        out.append(f"background-color:{_hex(r, g, b)};color:{INK}")
     return out
 
 
