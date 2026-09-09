@@ -31,7 +31,7 @@ ACCENT = "#B45309"
 SEQ    = ["#2563EB", "#15803D", "#B45309", "#DC2626", "#7C3AED", "#0891B2",
           "#EA580C", "#DB2777", "#4B5563", "#0284C7", "#059669"]
 
-st.set_page_config(page_title="Ecosystem Compass", layout="wide",
+st.set_page_config(page_title="AI Ecosystem Compass", layout="wide",
                    initial_sidebar_state="expanded")
 
 st.markdown(f"""
