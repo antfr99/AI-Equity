@@ -100,6 +100,76 @@ def aggregate_ecosystems(constituents: pd.DataFrame,
     return agg.round(2)
 
 
+def ecosystem_index_series(prices: pd.DataFrame,
+                           constituents: pd.DataFrame,
+                           weighting: str = "cap") -> pd.DataFrame:
+    """Build one indexed price series (base 100) per ecosystem over time.
+
+    Each constituent is rebased to 100 at the first date it has data, then
+    combined per ecosystem — cap-weighted (money's-eye view) or equal-weighted
+    (typical-name view). Weights are static, taken from current market cap, and
+    renormalized each day across whichever names have data that day, so a late
+    IPO simply joins the index when it starts trading rather than distorting it.
+    """
+    if prices.empty or constituents.empty:
+        return pd.DataFrame()
+
+    caps = (pd.to_numeric(constituents.set_index("Ticker")["Market Cap ($B)"],
+                          errors="coerce")
+            if "Market Cap ($B)" in constituents.columns else pd.Series(dtype=float))
+
+    out: Dict[str, pd.Series] = {}
+    for eco, g in constituents.groupby("Ecosystem"):
+        members = [t for t in g["Ticker"] if t in prices.columns]
+        if not members:
+            continue
+        block = prices[members].apply(pd.to_numeric, errors="coerce")
+        # rebase each column to 100 at its own first valid observation
+        rebased = block.divide(block.apply(lambda c: c[c.notna()].iloc[0]
+                                           if c.notna().any() else np.nan)) * 100
+
+        if weighting == "cap" and caps.reindex(members).notna().any():
+            w = caps.reindex(members).fillna(0.0).clip(lower=0)
+            if float(w.sum()) <= 0:
+                w = pd.Series(1.0, index=members)
+        else:
+            w = pd.Series(1.0, index=members)
+
+        wmat = pd.DataFrame(np.tile(w.values, (len(rebased), 1)),
+                            index=rebased.index, columns=members)
+        wmat = wmat.where(rebased.notna())               # only weight live names
+        wmat = wmat.divide(wmat.sum(axis=1), axis=0)      # renormalize daily
+        out[eco] = (rebased * wmat).sum(axis=1, min_count=1)
+
+    return pd.DataFrame(out).dropna(how="all")
+
+
+def contribution_breakdown(constituents: pd.DataFrame, ecosystem: str,
+                           top_n: int = 8) -> pd.DataFrame:
+    """Cap-weighted return contribution of each name within one ecosystem:
+    weight × return. Shows what actually drove (or dragged) the aggregate."""
+    g = constituents[constituents["Ecosystem"] == ecosystem].copy()
+    if g.empty:
+        return pd.DataFrame()
+    caps = pd.to_numeric(g["Market Cap ($B)"], errors="coerce")
+    ret = pd.to_numeric(g["Total Return (%)"], errors="coerce")
+    mask = caps.notna() & ret.notna() & (caps > 0)
+    if not mask.any():
+        return pd.DataFrame()
+    w = caps.where(mask, 0.0)
+    w = w / w.sum()
+    g["Contribution (pp)"] = (w * ret).round(2)
+    g = g.dropna(subset=["Contribution (pp)"]).sort_values(
+        "Contribution (pp)", ascending=False)
+    if len(g) > top_n:
+        head = g.head(top_n)[["Company", "Contribution (pp)"]]
+        rest = pd.DataFrame([{"Company": f"Other {len(g) - top_n}",
+                              "Contribution (pp)": round(
+                                  g["Contribution (pp)"].iloc[top_n:].sum(), 2)}])
+        return pd.concat([head, rest], ignore_index=True)
+    return g[["Company", "Contribution (pp)"]].reset_index(drop=True)
+
+
 def rank_metric_options(has_bench: bool) -> List[str]:
     opts = [
         "Return CW (%)", "Return EW (%)", "Median Return (%)",

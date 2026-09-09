@@ -1,3 +1,4 @@
+# No matplotlib needed — table coloring is pure-Python, charts are Plotly.
 streamlit>=1.34
 yfinance>=0.2.55
 curl_cffi>=0.7

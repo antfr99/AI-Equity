@@ -19,6 +19,10 @@ streamlit run app.py
 
 ## What you get
 
+- **Timeline** — each ecosystem as an indexed price series (base 100) over the
+  window, cap- or equal-weighted, with SPY dashed on top. Weights renormalize
+  daily across whichever names have data, so a late IPO joins the index cleanly
+  instead of distorting it.
 - **Leaderboard** — ecosystems ranked by whichever metric you choose (cap- or
   equal-weighted return, excess vs benchmark, Sharpe, volatility, drawdown,
   momentum, breadth, or total market cap). Leader is highlighted; the SPY line
@@ -28,10 +32,17 @@ streamlit run app.py
 - **Breadth** — share of constituents with a positive return. A high
   cap-weighted return next to low breadth flags a "few mega-caps carrying it"
   ecosystem, which the `CW − EW (pp)` column also captures.
+- **Valuation vs momentum** — median P/E against % above the 50-day SMA, so you
+  can spot cheap-and-rising vs expensive-and-fading ecosystems at a glance.
 - **Scorecard** — full per-ecosystem table with a red→green gradient on the key
   columns; downloadable as CSV.
-- **Drill-down** — pick an ecosystem for its constituent table, a by-sector
-  breakdown, and a leaders/laggards list.
+- **Drill-down** — pick an ecosystem for its constituent table, a **return
+  drivers** chart (cap-weighted contribution = weight × return, so you see which
+  names actually moved the aggregate), a by-sector breakdown, and a
+  leaders/laggards list.
+
+The table coloring is computed in pure Python (no matplotlib dependency), so it
+renders on a bare Streamlit Cloud install.
 
 ## Filters
 
@@ -43,7 +54,9 @@ refresh / clear cache.
 
 - `app.py` — Streamlit UI
 - `data_layer.py` — registry + fetching + per-ticker metrics
-- `aggregate.py` — ecosystem roll-up (cap- and equal-weighted)
+- `aggregate.py` — ecosystem roll-up, timeline index, contribution breakdown
+- `.streamlit/config.toml` — pins the dark theme (keep this next to `app.py`;
+  without it the top bar and widget accents fall back to Streamlit defaults)
 
 ## Notes
 
