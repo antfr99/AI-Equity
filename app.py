@@ -184,7 +184,7 @@ with st.sidebar:
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-st.markdown("# Ecosystem Compass")
+st.markdown("# AI Ecosystem Compass")
 st.markdown('<p class="lede">Where is capital being rewarded across the technology stack? '
             'Each ecosystem is ranked on how its constituents performed, how much risk that '
             'took, and how broadly the strength was shared — then you can open any one to see '
